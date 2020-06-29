@@ -8,7 +8,7 @@ import api from '../../services/api';
 
 import Header from '../../components/Header';
 
-import formatValue from '../../utils/formatValue';
+import { formatValue, formatDate } from '../../utils/formatValue';
 
 import { Container, CardContainer, Card, TableContainer } from './styles';
 
@@ -35,7 +35,7 @@ interface Response {
 }
 
 const Dashboard: React.FC = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Array<Transaction>>([]);
   const [balance, setBalance] = useState<Balance>({} as Balance);
 
   useEffect(() => {
@@ -44,8 +44,24 @@ const Dashboard: React.FC = () => {
       const { transactions: transactionsFromApi } = data;
       const { balance: balanceFromApi } = data;
 
-      setTransactions(transactionsFromApi);
-      setBalance(balanceFromApi);
+      const transactionsFormated = transactionsFromApi.map(transaction => {
+        const formattedValue = formatValue(transaction.value);
+        const formattedDate = transaction.created_at.toString();
+        return {
+          ...transaction,
+          formattedValue,
+          formattedDate,
+        };
+      });
+
+      const balanceFormated = {
+        income: formatValue(Number(balanceFromApi.income)),
+        outcome: formatValue(Number(balanceFromApi.outcome)),
+        total: formatValue(Number(balanceFromApi.total)),
+      };
+
+      setTransactions(transactionsFormated);
+      setBalance(balanceFormated);
     }
 
     loadTransactions();
@@ -94,9 +110,11 @@ const Dashboard: React.FC = () => {
               {transactions.map(transaction => (
                 <tr key={transaction.id}>
                   <td className="title">{transaction.title}</td>
-                  <td className={transaction.type}>{transaction.value}</td>
+                  <td className={transaction.type}>
+                    {transaction.formattedValue}
+                  </td>
                   <td>{transaction.category.title}</td>
-                  <td>{transaction.created_at.toString()}</td>
+                  <td>{transaction.formattedDate}</td>
                 </tr>
               ))}
             </tbody>
