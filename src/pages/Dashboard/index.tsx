@@ -46,7 +46,7 @@ const Dashboard: React.FC = () => {
 
       const transactionsFormated = transactionsFromApi.map(transaction => {
         const formattedValue = formatValue(transaction.value);
-        const formattedDate = transaction.created_at.toString();
+        const formattedDate = formatDate(new Date(transaction.created_at));
         return {
           ...transaction,
           formattedValue,
